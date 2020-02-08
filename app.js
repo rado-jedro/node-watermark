@@ -98,11 +98,22 @@ const startApp = async () => {
       }
     ]);
     options.watermarkImage = image.filename;
-    addImageWatermarkToImage(
-      "./img/" + options.inputImage,
-      "./img/" + prepareOutputFilename(options.inputImage),
-      "./img/" + options.watermarkImage
-    );
+    try {
+      if (
+        fs.existsSync("./img/" + options.inputImage) &&
+        fs.existsSync("./img/" + options.watermarkImage)
+      ) {
+        addImageWatermarkToImage(
+          "./img/" + options.inputImage,
+          "./img/" + prepareOutputFilename(options.inputImage),
+          "./img/" + options.watermarkImage
+        );
+      } else {
+        console.log("Something went wrong... Try again");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 };
 
