@@ -1,0 +1,11 @@
+{
+  "name": "node-watermark",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/rado-jedro/node-watermark.git",
+  "author": "Rado Jedro <radoslaw.jedro@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "jimp": "0.6.4"
+  }
+}
