@@ -1,12 +1,11 @@
 const Jimp = require("jimp");
-const inquirer = require('inquirer');
-
+const inquirer = require("inquirer");
 
 const addTextWatermarkToImage = async function(inputFile, outputFile, text) {
   const image = await Jimp.read(inputFile);
   const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
   const textData = {
-    text,
+    text: text,
     alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
     alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
   };
@@ -15,20 +14,27 @@ const addTextWatermarkToImage = async function(inputFile, outputFile, text) {
   image.quality(100).write(outputFile);
 };
 
-addTextWatermarkToImage('./test.jpg', './test-with-watermark.jpg', 'Hello world')
+const addImageWatermarkToImage = async function(
+  inputFile,
+  outputFile,
+  watermarkFile
+) {
+  const image = await Jimp.read(inputFile);
+  const watermark = await Jimp.read(watermarkFile);
+  const x = image.getWidth() / 2 - watermark.getWidth() / 2;
+  const y = image.getHeight() / 2 - watermark.getHeight() / 2;
 
-const addImageWatermarkToImage = async function(inputFile, outputFile, watermarkFile) {
-    const image = await Jimp.read(inputFile);
-    const watermark = await Jimp.read(watermarkFile);
-    const x = image.getWidth() / 2 - watermark.getWidth() / 2;
-    const y = image.getHeight() / 2 - watermark.getHeight() / 2;
-  
-    image.composite(watermark, x, y, {
-      mode: Jimp.BLEND_SOURCE_OVER,
-      opacitySource: 0.5,
-    });
-    image.quality(100).write(outputFile);
-  };
+  image.composite(watermark, x, y, {
+    mode: Jimp.BLEND_SOURCE_OVER,
+    opacitySource: 0.5
+  });
+  image.quality(100).write(outputFile);
+};
+
+const prepareOutputFilename = filename => {
+  const [name, ext] = filename.split(".");
+  return `${name}-with-watermark.${ext}`;
+};
 
 const startApp = async () => {
   // Ask if user is ready
@@ -58,27 +64,37 @@ const startApp = async () => {
       choices: ["Text watermark", "Image watermark"]
     }
   ]);
-  
-  if(options.watermarkType === 'Text watermark') {
-    const text = await inquirer.prompt([{
-      name: 'value',
-      type: 'input',
-      message: 'Type your watermark text:',
-    }]);
-    options.watermarkText = text.value;
-    addTextWatermarkToImage('./img/' + options.inputImage, './test-with-watermark.jpg', options.watermarkText);
-  }
-  else {
-    const image = await inquirer.prompt([{
-      name: 'filename',
-      type: 'input',
-      message: 'Type your watermark name:',
-      default: 'logo.png',
-    }]);
-    options.watermarkImage = image.filename;
-    addImageWatermarkToImage('./img/' + options.inputImage, './test-with-watermark.jpg', './img/' + options.watermarkImage);
-  }
 
+  if (options.watermarkType === "Text watermark") {
+    const text = await inquirer.prompt([
+      {
+        name: "value",
+        type: "input",
+        message: "Type your watermark text:"
+      }
+    ]);
+    options.watermarkText = text.value;
+    addTextWatermarkToImage(
+      "./img/" + options.inputImage,
+      "./img/" + prepareOutputFilename(options.inputImage),
+      options.watermarkText
+    );
+  } else {
+    const image = await inquirer.prompt([
+      {
+        name: "filename",
+        type: "input",
+        message: "Type your watermark name:",
+        default: "logo.png"
+      }
+    ]);
+    options.watermarkImage = image.filename;
+    addImageWatermarkToImage(
+      "./img/" + options.inputImage,
+      "./img/" + prepareOutputFilename(options.inputImage),
+      "./img/" + options.watermarkImage
+    );
+  }
 };
 
 startApp();
