@@ -115,6 +115,8 @@ const startApp = async () => {
       console.error(error);
     }
   }
+  console.log('New watermark file has been saved');
+  startApp();
 };
 
 startApp();
